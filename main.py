@@ -30,14 +30,15 @@ class RailFence(Cipher):
         cipher_text = ""
         
         for line_index in xrange(0, key):
-            letter_index = line_index
-            cipher_text += plain_text[letter_index]
-            while letter_index >= len(plain_text):
+            letter_index = 0
+            print "line index == letter_index = " + str(line_index)
+            cipher_text += plain_text[line_index]
+            while letter_index + 2 * key < len(plain_text):
                 #Egzistuoja poros, kurių viršūnės susiliečia
-                letter_index += 2 * key - 1
-                cipher_text += plain_text[letter_index]
-                letter_index += 1
-                cipher_text += plain_text[letter_index]
+                letter_index += 2 * key
+                cipher_text += plain_text[letter_index - (line_index + 1)] 
+                cipher_text += plain_text[letter_index + line_index]
+                
 
 
         return cipher_text
@@ -50,4 +51,4 @@ if __name__ == "__main__":
     key = 4
     cipher = rf.encode("Hippopotamus", key)
     print cipher
-    print rf.decode(cipher, key)
+    #print rf.decode(cipher, key)
