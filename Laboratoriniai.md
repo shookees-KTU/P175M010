@@ -33,3 +33,10 @@ Iššifravimui reikalingas užšifruotas tekstas ir raktas - intervalas kada buv
 Visas principas yra pagrįstas atvirkštiniu būdu, nei buvo užšifruota:
 1. Sužinomos eilutės
 2. Zigzagu atšifruojamas tekstas
+
+Pirmasis žingsnis turi šiokių tokių svarbių aspektų:
+1. Gali egzistuoti "uodega" - paskutinis stulpelis, kuris nėra užpildytas;
+2. Uodega svarbi tuo, kad ji gali būti užrašoma tiek iš viršaus, tiek iš apačios - reikia nustatyti kryptį ir raidžių uodegoje kiekį;
+3. Žinant kiekį, reikia nustatyti kaip nuskaityti užšifruotą tekstą (jei nuo viršaus rašomos uodegos n raidžių, tai pirmosios n eilučių bus ilgesnės vienu simboliu ir atvirkščiai - iš apačios rašomos uodegos n raidžių, tai paskutinės n eilučių bus vieni simboliu ilgesnės).
+
+```
