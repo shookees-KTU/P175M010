@@ -33,6 +33,8 @@ class RailFence(Cipher):
     '''
     def encode(self, plain_text, key):
         cipher_text = ""
+        #išimami tarpai
+        plain_text = plain_text.replace(" ", "")
         
         for line_index in xrange(0, key):
             letter_index = 0
