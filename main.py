@@ -21,11 +21,11 @@ if __name__ == "__main__":
     else:
         print "Užšifruoto teksto atšifravimas nesėkmingas"
 
-    '''cryptoanalyzed = rf.cryptoanalyze(cipher)
+    cryptoanalyzed = rf.cryptoanalyze(cipher)
 
-    if text in cryptoanalyzed: #bet žodžių atpažinimo sunkiai galima nuspėti kuris žodis teisingas
+    if text in cryptoanalyzed.values(): #be žodžių atpažinimo sunkiai galima nuspėti kuris žodis teisingas
         print "Kriptoanalizėje yra teisingas variantas" 
     else:
         print "Kriptoanalizėje nėra teisingo varianto"
 
-    print cryptoanalyzed'''
+    print cryptoanalyzed

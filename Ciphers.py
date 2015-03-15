@@ -83,3 +83,12 @@ class RailFence(Cipher):
        				plain_text += grupes[eilute][stulpelis]
 
         return plain_text
+
+    def cryptoanalyze(self, cipher_text):
+        raktas = 1
+        galimi_atsakymai = {}
+        while raktas < len(cipher_text) - 1:
+            galimi_atsakymai[raktas] = self.decode(cipher_text, raktas)
+            raktas += 1
+
+        return galimi_atsakymai
