@@ -9,9 +9,11 @@ from Ciphers import RailFence
 
 if __name__ == "__main__":
     rf = RailFence()
-    text = "Hippopotamusas"
+    text = "WE ARE DISCOVERED FLEE AT ONCE"
     key = 4
     print "Neužšifruotas tekstas: " + text
+    #pašalinami tarpai
+    text = text.replace(" ", "")
     cipher = rf.encode(text, key)
     print "Užšifruotas tekstas: " + cipher
     deciphered = rf.decode(cipher, key)
