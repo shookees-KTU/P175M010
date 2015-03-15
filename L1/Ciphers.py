@@ -44,8 +44,6 @@ class RailFence(Cipher):
                 if letter_index + line_index >= len(plain_text):
                     break
                 cipher_text += plain_text[letter_index + line_index]
-                
-
 
         return cipher_text
 
@@ -56,39 +54,39 @@ class RailFence(Cipher):
         #
         #pradžioje pradedama nuo viršaus į apačią, nelyginis skaičius
         plain_text = ""
-        stulpeliu = int(math.ceil(len(cipher_text) / float(key)))
-        uodega = len(cipher_text) % key #nustatomas ilgis
-        uodega *= -1 if stulpeliu % 2 == 0 else 1 #nustatoma kryptis
+        columns = int(math.ceil(len(cipher_text) / float(key)))
+        tail = len(cipher_text) % key #nustatomas ilgis
+        tail *= -1 if columns % 2 == 0 else 1 #nustatoma kryptis
        	ind = 0 #zingsnis, kurio pagalba kopijuojamas tekstas į grupes
        	grupes = [] #grupes, tai atbuliniu zingsniu sudaryta tvorele
        	for i in xrange(0, key):
        		#pridedamas papildomas kiekis (1 daugiau) simbolių, nei įprastai
-       		if (uodega > 0 and i <= uodega - 1) or (uodega < 0 and i >= key + uodega):
-       			grupes.append(cipher_text[ind: ind + stulpeliu])
-       			ind += stulpeliu
+       		if (tail > 0 and i <= tail - 1) or (tail < 0 and i >= key + tail):
+       			grupes.append(cipher_text[ind: ind + columns])
+       			ind += columns
        		else:
-       			grupes.append(cipher_text[ind: ind + stulpeliu - 1])
-       			ind += stulpeliu - 1
+       			grupes.append(cipher_text[ind: ind + columns - 1])
+       			ind += columns - 1
 
        	#gautos grupes, formuojamas tekstas
-       	for stulpelis in xrange(0, stulpeliu):
-       		iteratorius = xrange(0, key)
+       	for column in xrange(0, columns):
+       		iterator = xrange(0, key)
        		
-       		if stulpelis % 2 == 1:
-       			#apverciamas iteratorius
-       			iteratorius = reversed(iteratorius)
+       		if column % 2 == 1:
+       			#apverciamas iterator
+       			iterator = reversed(iterator)
 
-       		for eilute in iteratorius:
-       			if (stulpelis <= len(grupes[eilute]) - 1):
-       				plain_text += grupes[eilute][stulpelis]
+       		for eilute in iterator:
+       			if (column <= len(grupes[eilute]) - 1):
+       				plain_text += grupes[eilute][column]
 
         return plain_text
 
     def cryptoanalyze(self, cipher_text):
-        raktas = 1
-        galimi_atsakymai = {}
-        while raktas < len(cipher_text) - 1:
-            galimi_atsakymai[raktas] = self.decode(cipher_text, raktas)
-            raktas += 1
+        key = 1
+        possible_answers = {}
+        while key < len(cipher_text) - 1:
+            possible_answers[key] = self.decode(cipher_text, key)
+            key += 1
 
-        return galimi_atsakymai
+        return possible_answers
