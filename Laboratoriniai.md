@@ -4,7 +4,9 @@
  1. [Pirmasis laboratorinis darbas - Rail Fence realizacija](#pirmasis-laboratorinis-darbas)
  
 ##Pirmasis laboratorinis darbas
-Šiame darbe realizuotas transpozicinis [Rail Fence](http://en.wikipedia.org/wiki/Rail_fence_cipher) šifras, kurio principas - raidžių išdėstymas zigzagu ir nuskaitymas į vieną žodį eilutė po eilutės
+Šiame darbe realizuotas transpozicinis [Rail Fence](http://en.wikipedia.org/wiki/Rail_fence_cipher) šifras, kurio principas - raidžių išdėstymas zigzagu ir nuskaitymas į vieną žodį eilutė po eilutės.
+
+Realizacija: [Atlikta](L1)
 ###Užšifravimas
 Pavyzdžiui:
 Žodis "WE ARE DISCOVERED FLEE AT ONCE"
