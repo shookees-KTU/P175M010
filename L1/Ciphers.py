@@ -14,7 +14,7 @@ class Cipher:
         raise NotImplementedError("Decoding not implemented")
 
     def cryptoanalyze(self, cipher_text):
-    	raise NotImplementedError("Crypto analysis not implemented")
+        raise NotImplementedError("Crypto analysis not implemented")
 
 class RailFence(Cipher):
     '''
@@ -59,28 +59,28 @@ class RailFence(Cipher):
         columns = int(math.ceil(len(cipher_text) / float(key)))
         tail = len(cipher_text) % key #nustatomas ilgis
         tail *= -1 if columns % 2 == 0 else 1 #nustatoma kryptis
-       	ind = 0 #zingsnis, kurio pagalba kopijuojamas tekstas į grupes
-       	grupes = [] #grupes, tai atbuliniu zingsniu sudaryta tvorele
-       	for i in xrange(0, key):
-       		#pridedamas papildomas kiekis (1 daugiau) simbolių, nei įprastai
-       		if (tail > 0 and i <= tail - 1) or (tail < 0 and i >= key + tail):
-       			grupes.append(cipher_text[ind: ind + columns])
-       			ind += columns
-       		else:
-       			grupes.append(cipher_text[ind: ind + columns - 1])
-       			ind += columns - 1
+        ind = 0 #zingsnis, kurio pagalba kopijuojamas tekstas į grupes
+        grupes = [] #grupes, tai atbuliniu zingsniu sudaryta tvorele
+        for i in xrange(0, key):
+            #pridedamas papildomas kiekis (1 daugiau) simbolių, nei įprastai
+            if (tail > 0 and i <= tail - 1) or (tail < 0 and i >= key + tail):
+                grupes.append(cipher_text[ind: ind + columns])
+                ind += columns
+            else:
+                grupes.append(cipher_text[ind: ind + columns - 1])
+                ind += columns - 1
 
-       	#gautos grupes, formuojamas tekstas
-       	for column in xrange(0, columns):
-       		iterator = xrange(0, key)
-       		
-       		if column % 2 == 1:
-       			#apverciamas iterator
-       			iterator = reversed(iterator)
+        #gautos grupes, formuojamas tekstas
+        for column in xrange(0, columns):
+            iterator = xrange(0, key)
+            
+            if column % 2 == 1:
+                #apverciamas iterator
+                iterator = reversed(iterator)
 
-       		for eilute in iterator:
-       			if (column <= len(grupes[eilute]) - 1):
-       				plain_text += grupes[eilute][column]
+            for eilute in iterator:
+                if (column <= len(grupes[eilute]) - 1):
+                    plain_text += grupes[eilute][column]
 
         return plain_text
 
