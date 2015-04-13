@@ -6,24 +6,36 @@ from urllib.parse import parse_qs
 from Auth.Authenticator import Authenticator
 
 class CaesarLoginHandler(http.server.BaseHTTPRequestHandler):
-    actions = {
-        "login":
-    }
 
-    def check_login(self, username, password):
-        return Authenticator().checkAuthenticity(username, password)
+
+    def check_login(self, data):
+        validLogin = False
+        if "username" in data.keys() and "password" in data.keys():
+            validLogin = Authenticator().checkAuthenticity(''.join(data["username"]), ''.join(data["password"]))
+
+        if validLogin:
+            code = 200
+        else:
+            code = 401
+
+        return (code, self.responses[code][0])
+
+    actions = {
+        "login": check_login
+    }
 
     def do_POST(self):
         print("POST request received")
         data = self.get_data()
-        #Patirkina ar turi palaikomą veiksmą
-        for key in data.keys():
-            if key in self.actions:
-                actions[key](data)
+        if "action" in data.keys():
+            if ''.join(data["action"]) in self.actions.keys():
+                (code, msg) = self.actions[''.join(data["action"])](self, data)
+                self.send_response(code, msg)
+                self.end_headers()
+            else:
+                self.send_error(501, self.responses[501][0], self.responses[501][1])
         else:
-
-
-
+            self.send_error(400, self.responses[400][0], self.respones[400][1])
 
     def get_data(self):
         length = int(self.headers["Content-Length"])
