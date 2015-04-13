@@ -2,6 +2,7 @@
 Čia bus laboratorinių darbų aprašai su nuorodomis į konkrečias kodo vietas ir prezentacijas
 ##Turinys
  1. [Pirmasis laboratorinis darbas - Rail Fence realizacija](#pirmasis-laboratorinis-darbas)
+ 2. [Antrasis laboratorinis darbas - Caesar autentifikacija ir autorizacija("#antrasis-laboratorinis-darbas)
  
 ##Pirmasis laboratorinis darbas
 Šiame darbe realizuotas transpozicinis [Rail Fence](http://en.wikipedia.org/wiki/Rail_fence_cipher) šifras, kurio principas - raidžių išdėstymas zigzagu ir nuskaitymas į vieną žodį eilutė po eilutės.
@@ -42,3 +43,4 @@ Pirmasis žingsnis turi šiokių tokių svarbių aspektų:
 3. Žinant kiekį, reikia nustatyti kaip nuskaityti užšifruotą tekstą (jei nuo viršaus rašomos uodegos n raidžių, tai pirmosios n eilučių bus ilgesnės vienu simboliu ir atvirkščiai - iš apačios rašomos uodegos n raidžių, tai paskutinės n eilučių bus vieni simboliu ilgesnės).
 
 ```
+##Antrasis laboratorinis darbas
