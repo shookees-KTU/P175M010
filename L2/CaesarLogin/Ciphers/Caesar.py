@@ -1,5 +1,6 @@
-# -*- coding: utf-8 -*-
 __author__ = 'shookees'
+# -*- coding: utf-8 -*-
+
 from . import Cipher
 
 class Caesar(Cipher):
