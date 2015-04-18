@@ -12,7 +12,6 @@ class AuthDB:
         self.dbFile = os.path.join(self.getCurrPath(), "auth.db")
         try:
             self.conn = lite.connect(self.dbFile)
-            self.cur = self.conn.cursor()
         except lite.Error as e:
             print("AuthDB Error %s:" % e.args[0])
 
@@ -25,19 +24,19 @@ class AuthDB:
 
     def getUsers(self):
         try:
-            self.cur.execute("SELECT username FROM users")
-            return self.cur.fetchall()
+            cur = self.conn.cursor()
+            cur.execute("SELECT username FROM users")
+            return cur.fetchall()
         except lite.Error as e:
-            print("getUsers")
             print(e)
             return []
 
     def getUserPassword(self, username):
         try:
-            self.cur.execute("SELECT password FROM users WHERE username = '" + username + "'")
-            return self.cur.fetchone()
+            cur = self.conn.cursor()
+            cur.execute("SELECT password FROM users WHERE username = '" + username + "'")
+            return cur.fetchone()
         except lite.Error as e:
-            print("getUserPassword")
             print(e)
             return None
 
@@ -57,12 +56,13 @@ class AuthDB:
         while self.getSession(token) != None:
             token = self.generateToken()
 
-        query = "INSERT INTO sessions(token, username, host, expiration, key) VALUES ('{0}', '{1}', '{2}', '{3}', '{4}')".format(str(token), ''.join(username), str(host),
-                                                                      int(expiration.strftime("%s")) * 1000, key)
+        query = "INSERT INTO sessions VALUES ('{0}', '{1}', '{2}', '{3}', '{4}')".format(str(token), int(expiration.strftime("%s")) * 1000, ''.join(username), str(host), key)
         try:
-            self.cur.execute(query)
+            cur = self.conn.cursor()
+            cur.execute(query)
+            self.conn.commit()
+            print(query)
         except lite.Error as e:
-            print("createSession")
             print(e)
             return None
         finally:
@@ -74,16 +74,14 @@ class AuthDB:
 
     def getSession(self, token):
         try:
-            self.cur.execute("SELECT token FROM sessions")
-
-            if (token,) in self.cur.fetchall():
-                self.cur.execute("SELECT token, username, host, expiration, key FROM sessions WHERE token = '{0}'".format(token))
-                return self.cur.fetchone()
+            cur = self.conn.cursor()
+            cur.execute("SELECT token FROM sessions")
+            tokens = cur.fetchall()
+            if (token,) in tokens:
+                cur.execute("SELECT token, username, host, expiration, key FROM sessions WHERE token = '{0}'".format(token))
+                return cur.fetchone()
             else:
                 return None
         except lite.Error as e:
-            print("getSession")
             print(e)
             return None
-
-
