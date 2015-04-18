@@ -12,6 +12,7 @@ class AuthDB:
         self.dbFile = os.path.join(self.getCurrPath(), "auth.db")
         try:
             self.conn = lite.connect(self.dbFile)
+            self.cur = self.conn.cursor()
         except lite.Error as e:
             print("AuthDB Error %s:" % e.args[0])
 
@@ -24,21 +25,19 @@ class AuthDB:
 
     def getUsers(self):
         try:
-            cur = self.conn.cursor()
-            cur.execute("SELECT username FROM users")
-            return cur.fetchall()
+            self.cur.execute("SELECT username FROM users")
+            return self.cur.fetchall()
         except lite.Error as e:
             print(e)
             return []
 
     def getUserPassword(self, username):
         try:
-            cur = self.conn.cursor()
-            cur.execute("SELECT password FROM users WHERE username = '" + username + "'")
-            return cur.fetchone()
+            self.cur.execute("SELECT password FROM users WHERE username = '" + username + "'")
+            return self.cur.fetchone()
         except lite.Error as e:
             print(e)
-            return None
+            return ""
 
     def checkUsername(self, username):
         return (username,) in self.getUsers()#tuple todel, kad ta grazina query
@@ -58,13 +57,11 @@ class AuthDB:
 
         query = "INSERT INTO sessions VALUES ('{0}', '{1}', '{2}', '{3}', '{4}')".format(str(token), int(expiration.strftime("%s")) * 1000, ''.join(username), str(host), key)
         try:
-            cur = self.conn.cursor()
-            cur.execute(query)
+            self.cur.execute(query)
             self.conn.commit()
-            print(query)
         except lite.Error as e:
             print(e)
-            return None
+            return ""
         finally:
             return token
 
