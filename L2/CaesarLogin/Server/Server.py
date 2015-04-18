@@ -18,8 +18,12 @@ class CaesarLoginHandler(http.server.BaseHTTPRequestHandler):
 
         if validLogin:
             cookie = self.getAuthCookie(data["username"])
-            self.send_response(200)
-            self.send_header("Set-Cookie", cookie.output().encode("utf-8"))
+            self.send_response(301)
+            self.send_header("Encoding", "utf-8")
+            self.send_header("Set-Cookie", 'host="{0}"'.format(cookie["host"].encode("utf-8")))
+            self.send_header("Set-Cookie", 'token="{0}"'.format(cookie["token"].encode("utf-8")))
+            self.send_header("Location", "/")
+            self.end_headers()
         else:
             code = 401
             self.send_error(401, self.responses[401][0], self.responses[401][1])
@@ -29,9 +33,9 @@ class CaesarLoginHandler(http.server.BaseHTTPRequestHandler):
         cipher = Caesar()
         #sausainis identifikacijai
         session = Authenticator().createSession(username, host)
-        C = cookies.SimpleCookie()
+        C = {}
         C["host"] = cipher.encode(session[2], session[4]) # host, key
-        C["token"] = cipher.encode(session[0], session[4]) # token, key
+        C["token"] = session[0] # token ir taip kriptinis
         return C
 
     actions = {
@@ -40,13 +44,10 @@ class CaesarLoginHandler(http.server.BaseHTTPRequestHandler):
 
     def do_GET(self):
         print("GET request received")
-        if "HTTP_COOKIE" in os.environ:
-            cookies = os.environ["HTTP_COOKIE"].split('; ')
-            c = {}
-            for cookie in cookies:
-                cookie = cookie.split('=')
-                c[cookie[0]] = cookie[1]
-            self.showHelloPage(c["token"])
+        print(self.headers)
+        if "Cookie" in self.headers:
+            cookie = cookies.SimpleCookie(self.headers["Cookie"])
+            self.showHelloPage(cookie["token"].value)
         else:
             if self.path == "/login":
                 self.showLoginPage()
@@ -66,23 +67,29 @@ class CaesarLoginHandler(http.server.BaseHTTPRequestHandler):
 
     def showHelloPage(self, token):
         self.send_response(200)
-        self.send_header("Content-type", "text/html")
-        self.end_headers()
-        self.wfile.write("<h1>{0}</h1>".format(Authenticator().adb.getSession(token)[1]))
-
-    def showLoginPage(self):
-        self.send_response(200)
         self.send_header("Content-type", "text/html; charset=utf-8")
         self.end_headers()
-        self.wfile.write("<h1>Prašau prisijungti</h1>".encode("utf-8"))
-        self.wfile.write(("<form method='POST'>"
-                         "Vardas:<br />"
-                         "<input type='text' name='username'><br />"
-                         "Slaptažodis:<br />"
-                         "<input type='password' name='password'><br />"
-                         "<input type='submit' name='action' value='login'>"
-                         "</form>").encode("utf-8"))
-        self.wfile.close()
+        token = token[2:-1] #pašalinamos šiukšlės
+        session = Authenticator().adb.getSession(token)
+        if session is None:
+            self.wfile.write(bytes("<h1>Klaida</h1>", "UTF-8"))
+        else:
+            self.wfile.write(bytes("<h1>Labas, {0}</h1>".format(session[1]), "UTF-8"))
+
+    def showLoginPage(self):
+        content = bytes("<h1>Prašau prisijungti</h1>"
+                   "<form method='POST'>"
+                   "Vardas:<br />"
+                   "<input type='text' name='username'><br />"
+                   "Slaptažodis:<br />"
+                   "<input type='password' name='password'><br />"
+                   "<input type='submit' name='action' value='login'>"
+                   "</form>", "UTF-8")
+        self.send_response(200)
+        self.send_header("Content-type", "text/html; charset=utf-8")
+        self.send_header("Content-Length", len(content))
+        self.end_headers()
+        self.wfile.write(content)
 
 
     def get_data(self):
