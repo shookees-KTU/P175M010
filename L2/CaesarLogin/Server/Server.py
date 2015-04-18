@@ -5,13 +5,22 @@ import http.server
 import os
 from Ciphers.Caesar import Caesar
 from http import cookies
-from urllib.parse import parse_qs
+from urllib.parse import urlparse, parse_qs
 from Auth.Authenticator import Authenticator
 
 class CaesarLoginHandler(http.server.BaseHTTPRequestHandler):
 
+    def logout(self, session, params):
+        #paprasčiausiai sugadinamas sausainis ir ištrinama iš db
+        Authenticator().adb.removeSession(session[0])
+        self.send_response(301)
+        self.send_header("Encoding", "utf-8")
+        self.send_header("Set-Cookie", 'host=""')
+        self.send_header("Set-Cookie", 'token=""')
+        self.send_header("Location", "/")
+        self.end_headers()
 
-    def check_login(self, data):
+    def check_login(self, data, params=None):
         validLogin = False
         if "username" in data.keys() and "password" in data.keys():
             validLogin = Authenticator().checkAuthenticity(''.join(data["username"]), ''.join(data["password"]))
@@ -26,7 +35,7 @@ class CaesarLoginHandler(http.server.BaseHTTPRequestHandler):
             self.end_headers()
         else:
             code = 401
-            self.send_error(401, self.responses[401][0], self.responses[401][1])
+            self.send_error   (401, self.responses[401][0], self.responses[401][1])
 
     def getAuthCookie(self, username):
         host, port = self.client_address
@@ -39,20 +48,25 @@ class CaesarLoginHandler(http.server.BaseHTTPRequestHandler):
         return C
 
     actions = {
-        "login": check_login
+        "login": check_login,
+        "logout": logout
     }
 
     def do_GET(self):
         print("GET request received")
-        print(self.headers)
+        authenticated = False
+        session = None
         if "Cookie" in self.headers:
+            #autentifikuojama
             cookie = cookies.SimpleCookie(self.headers["Cookie"])
-            self.showHelloPage(cookie["token"].value)
+            if len(cookie["token"].value) > 3:
+                session = Authenticator().adb.getSession(cookie["token"].value[2: -1])
+                if session is not None:
+                    authenticated = True
+        if authenticated:
+            self.showPage(session, self.path)
         else:
-            if self.path == "/login":
-                self.showLoginPage()
-            else:
-                self.send_error(401, self.responses[401][0], self.responses[401][1])
+            self.showLoginPage()
 
     def do_POST(self):
         print("POST request received")
@@ -65,16 +79,19 @@ class CaesarLoginHandler(http.server.BaseHTTPRequestHandler):
         else:
             self.send_error(400, self.responses[400][0], self.responses[400][1])
 
-    def showHelloPage(self, token):
+    def showPage(self, session, path):
+        params = parse_qs(urlparse(path).query)
+        data = self.get_data()
+        if "action" in params.keys():
+            self.actions[''.join(params["action"])](self, session, params)
+        elif path == "/":
+            self.showHelloPage(session)
+
+    def showHelloPage(self, session):
         self.send_response(200)
         self.send_header("Content-type", "text/html; charset=utf-8")
         self.end_headers()
-        token = token[2:-1] #pašalinamos šiukšlės
-        session = Authenticator().adb.getSession(token)
-        if session is None:
-            self.wfile.write(bytes("<h1>Klaida</h1>", "UTF-8"))
-        else:
-            self.wfile.write(bytes("<h1>Labas, {0}</h1>".format(session[1]), "UTF-8"))
+        self.wfile.write(bytes("<h1>Labas, {0}</h1><a href='?action=logout'>Atsijungti</a>".format(session[1]), "UTF-8"))
 
     def showLoginPage(self):
         content = bytes("<h1>Prašau prisijungti</h1>"
@@ -93,8 +110,10 @@ class CaesarLoginHandler(http.server.BaseHTTPRequestHandler):
 
 
     def get_data(self):
-        length = int(self.headers.get("Content-Length"))
-        data = parse_qs(self.rfile.read(length).decode("utf-8"))
+        data = None
+        if self.headers["Content-Length"]:
+            length = int(self.headers.get("Content-Length"))
+            data = parse_qs(self.rfile.read(length).decode("utf-8"))
         return data
 
 class SimpleServer:

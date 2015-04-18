@@ -19,4 +19,5 @@ class Authenticator:
         session = self.adb.getSession(token)
         cipher = Caesar()
 
-    def getUserData(selfself, token):
+    def getUserData(self, token):
+        pass

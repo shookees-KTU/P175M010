@@ -31,6 +31,21 @@ class AuthDB:
             print(e)
             return []
 
+    def removeSession(self, token):
+        try:
+            cur = self.conn.cursor()
+            cur.execute("SELECT token FROM sessions")
+            tokens = cur.fetchall()
+            if (token,) in tokens:
+                cur.execute("DELETE FROM sessions WHERE token = '{0}'".format(token))
+                self.conn.commit()
+                return cur.fetchone()
+            else:
+                return None
+        except lite.Error as e:
+            print(e)
+            return None
+
     def getUserPassword(self, username):
         try:
             self.cur.execute("SELECT password FROM users WHERE username = '" + username + "'")
