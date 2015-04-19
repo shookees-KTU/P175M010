@@ -6,6 +6,7 @@ import datetime
 import random
 import string
 
+
 class AuthDB:
     def __init__(self):
         self.conn = None
@@ -55,22 +56,23 @@ class AuthDB:
             return ""
 
     def checkUsername(self, username):
-        return (username,) in self.getUsers()#tuple todel, kad ta grazina query
+        return (username,) in self.getUsers()  # tuple todel, kad ta grazina query
 
     def checkUserPassword(self, username, password):
         if self.checkUsername(username):
             return self.getUserPassword(username) == (password,)
         else:
-            return False #the username is not legit
+            return False  # the username is not legit
 
     def createSession(self, username, host):
         expiration = datetime.datetime.now() + datetime.timedelta(minutes=15)
-        key = random.randint(1, 1024)#tiesiog skaicius, realiai dalinsis is alfabeto
+        key = random.randint(1, 1024)  # tiesiog skaicius, realiai dalinsis is alfabeto
         token = self.generateToken()
-        while self.getSession(token) != None:
+        while self.getSession(token) is not None:
             token = self.generateToken()
 
-        query = "INSERT INTO sessions VALUES ('{0}', '{1}', '{2}', '{3}', '{4}')".format(str(token), int(expiration.strftime("%s")) * 1000, ''.join(username), str(host), key)
+        query = "INSERT INTO sessions VALUES ('{0}', '{1}', '{2}', '{3}', '{4}')".format(str(token), int(
+            expiration.strftime("%s")) * 1000, ''.join(username), str(host), key)
         try:
             self.cur.execute(query)
             self.conn.commit()
@@ -79,7 +81,6 @@ class AuthDB:
             return ""
         finally:
             return token
-
 
     def generateToken(self):
         return ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(64))
@@ -90,7 +91,8 @@ class AuthDB:
             cur.execute("SELECT token FROM sessions")
             tokens = cur.fetchall()
             if (token,) in tokens:
-                cur.execute("SELECT token, username, host, expiration, key FROM sessions WHERE token = '{0}'".format(token))
+                cur.execute(
+                    "SELECT token, username, host, expiration, key FROM sessions WHERE token = '{0}'".format(token))
                 return cur.fetchone()
             else:
                 return None
