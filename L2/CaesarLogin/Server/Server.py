@@ -2,7 +2,7 @@ __author__ = 'shookees'
 # -*- coding: utf-8 -*-
 import time
 import http.server
-import os
+import html
 from Ciphers.Caesar import Caesar
 from http import cookies
 from urllib.parse import urlparse, parse_qs
@@ -17,6 +17,7 @@ class CaesarLoginHandler(http.server.BaseHTTPRequestHandler):
         self.send_header("Encoding", "utf-8")
         self.send_header("Set-Cookie", 'host=""')
         self.send_header("Set-Cookie", 'token=""')
+        self.send_header("Set-Cookie", 'key=""')
         self.send_header("Location", "/")
         self.end_headers()
 
@@ -31,6 +32,7 @@ class CaesarLoginHandler(http.server.BaseHTTPRequestHandler):
             self.send_header("Encoding", "utf-8")
             self.send_header("Set-Cookie", 'host="{0}"'.format(cookie["host"].encode("utf-8")))
             self.send_header("Set-Cookie", 'token="{0}"'.format(cookie["token"].encode("utf-8")))
+            self.send_header("Set-Cookie", 'key="{0}"'.format(cookie["key"]))
             self.send_header("Location", "/")
             self.end_headers()
         else:
@@ -45,11 +47,36 @@ class CaesarLoginHandler(http.server.BaseHTTPRequestHandler):
         C = {}
         C["host"] = cipher.encode(session[2], session[4]) # host, key
         C["token"] = session[0] # token ir taip kriptinis
+        C["key"] = session[4]
         return C
+
+    def parseRequest(self, data, params=None):
+        if "Cookie" in self.headers:
+            #autentifikuojama
+            cookie = cookies.SimpleCookie(self.headers["Cookie"])
+            if len(cookie["token"].value) > 3:
+                session = Authenticator().adb.getSession(cookie["token"].value[2: -1])
+                if session is not None:
+                    authenticated = True
+        if authenticated:
+            key = session[4]%26
+            self.send_response(200)
+            self.send_header("Content-type", "text/html; charset=utf-8")
+            self.end_headers()
+            print(data)
+            if data["query"]:
+                query = html.unescape(data["query"])[0]
+                if query == Caesar().encode("labas", key):
+                    self.wfile.write(bytes(html.escape(Caesar().encode("Nu labas", key)), "UTF-8"))
+                else:
+                    self.wfile.write(bytes(html.escape(Caesar().encode("Nežinau šitos komandos", key)), "UTF-8"))
+            else:
+                self.wfile.write(bytes(html.escape(Caesar().encode("ERROR", key)), "UTF-8"))
 
     actions = {
         "login": check_login,
-        "logout": logout
+        "logout": logout,
+        "request": parseRequest
     }
 
     def do_GET(self):
@@ -91,7 +118,13 @@ class CaesarLoginHandler(http.server.BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header("Content-type", "text/html; charset=utf-8")
         self.end_headers()
-        self.wfile.write(bytes("<h1>Labas, {0}</h1><a href='?action=logout'>Atsijungti</a>".format(session[1]), "UTF-8"))
+        self.wfile.write(bytes("<h1>Labas, {0}</h1>\n".format(session[1]), "UTF-8"))
+        self.wfile.write(bytes("<a href='?action=logout'>Atsijungti</a>\n", "UTF-8"))
+        self.wfile.write(bytes("<form name='f1'>\n<p>Tekstas: <input name='word' type='text'>\n", "UTF-8"))
+        self.wfile.write(bytes("<input value='Siųsti' type='button' onclick='Javascript:xmlhttpPost(\"\")'></p>\n", "UTF-8"))
+        self.wfile.write(bytes("<div id='result'></div>\n</form>\n", "UTF-8"))
+        with open("js/server.js", "r") as file:
+            self.wfile.write(bytes("<script type='text/javascript'>\n{0}\n</script>".format(file.read()), "UTF-8"))
 
     def showLoginPage(self):
         content = bytes("<h1>Prašau prisijungti</h1>"
