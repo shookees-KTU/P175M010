@@ -42,5 +42,9 @@ Pirmasis žingsnis turi šiokių tokių svarbių aspektų:
 2. Uodega svarbi tuo, kad ji gali būti užrašoma tiek iš viršaus, tiek iš apačios - reikia nustatyti kryptį ir raidžių uodegoje kiekį;
 3. Žinant kiekį, reikia nustatyti kaip nuskaityti užšifruotą tekstą (jei nuo viršaus rašomos uodegos n raidžių, tai pirmosios n eilučių bus ilgesnės vienu simboliu ir atvirkščiai - iš apačios rašomos uodegos n raidžių, tai paskutinės n eilučių bus vieni simboliu ilgesnės).
 
-```
 ##Antrasis laboratorinis darbas
+Šiame laboratoriniame darbe realizuota kliento-serverio komunikavimo sistema su cezario šifru.
+
+Cezario šifras yra paremtas individualios raidės perstūmimu. Pavyzdžiui A perstūmiama per 2 vietas angliškame alfabete, būtų A->B->**C**
+
+Ši sistema lygiai tuo pačiu principu tekstą užšifruoja ir atšifruoja kliento ir serverio pusėse.
