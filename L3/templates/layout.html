@@ -1,0 +1,17 @@
+<!doctype html>
+<title xmlns="http://www.w3.org/1999/html">L3</title>
+<link rel="stylesheet" type="text/css" href="{{ url_for("static", filename="style.css") }}"/>
+<div class="page">
+    <h1>L3</h1>
+    <div class="metanav">
+        {% if not session.logged_in %}
+            <a href="{{ url_for("login") }}">Prisijungti</a>
+        {% else %}
+            <a href="{{ url_for("logout") }}">Atsijungti</a>
+        {% endif %}
+    </div>
+{% for url_for in get_flashed_message %}
+    <div class="flash">{{  message }}</div>
+{% endfor %}
+{% block body %}{% endblock %}
+</div>

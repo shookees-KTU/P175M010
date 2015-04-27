@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+{% block body %}
+    <h2>Prisijungimas</h2>
+    {% if error %}
+        <p class="error"><strong>Klaida:</strong> {{ error }}</p>
+    {% endif %}
+    <form action="{{ url_for("login") }}" method="post">
+        <dl>
+            <dt>Vardas:</dt>
+            <dd><input type="text" name="username"></dd>
+            <dt>Slaptažodis</dt>
+            <dd><input type="password" name="password"></dd>
+            <dd><input type="submit" value="Prisijungti"></dd>
+        </dl>
+    </form>
+{% endblock %}
