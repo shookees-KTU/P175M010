@@ -1,4 +1,9 @@
+# coding=utf-8
+import base64
+import os
+from Steganography import ImageRandomizer, Image
 from contextlib import closing
+import random, string
 import sqlite3
 from flask import Flask, g, render_template, session, request, abort, flash, redirect, url_for
 
@@ -6,8 +11,6 @@ from flask import Flask, g, render_template, session, request, abort, flash, red
 DATABASE = "/tmp/L3.db"
 DEBUG = True
 SECRET_KEY = "kriptografija"
-USERNAME = "admin"
-PASSWORD = "admin"
 
 
 app = Flask(__name__)
@@ -43,27 +46,69 @@ def add_entry():
     g.db.execute("insert into entries(title, text) values('{0}','{1}')".format(
                  request.form["title"].encode("utf-8"), request.form["text"].encode("utf-8")))
     g.db.commit()
-    flash("New entry was successfully posted")
+    flash("Naujas įrašas sėkmingai išsaugotas")
     return redirect(url_for("show_entries"))
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    error = None
+    if request.method == "POST":
+        if request.form["username"]:
+            cur = g.db.execute("select 1 from accounts where username='{0}'".format(request.form["username"]))
+            if cur.rowcount > 0:
+                error = "Vartotojo vardas jau egzistuoja"
+            else:
+                #sukuriamas paprastas irasas
+                password = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(12))
+                cur = g.db.execute("insert into accounts(username, password) values('{0}', '{1}')".format(
+                                   request.form["username"].encode("utf-8"), password))
+                g.db.commit()
+
+                id = str(int(cur.lastrowid)) + ".png"
+                #bandom isideti paveiksleli
+                if not ImageRandomizer.createRandomImage(id):
+                    error = "Prasau bandyti iš naujo".encode("UTF-8")
+                else:
+                    Image.hide("/tmp/" + str(id), password)
+                with open("/tmp/" + str(id), "rb") as image_file:
+                    encoded_string = base64.b64encode(image_file.read())
+                #apsivalome
+                #os.remove("images/" + str(id))
+                return render_template("register.html", img=encoded_string)
+        else:
+            error = "Blogai uzpildyta forma".encode("UTF-8")
+
+        if error:
+            redirect(url_for("register"))
+    elif request.method == "GET":
+        return render_template("register.html")
+
+
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
     error = None
     if request.method == "POST":
-        if request.form["username"] != app.config["USERNAME"]:
-            error = "Invalid username"
-        elif request.form["password"] != app.config["PASSWORD"]:
-            error = "invalid password"
+        cur = g.db.execute("select password from accounts where username='{0}'".format(
+                                   request.form["username"].encode("utf-8")))
+        password = cur.fetchone()
+        #gaunam paveiksliuka
+        pic = request.files["file"]
+        decodedPassword = Image.retrieve(pic)
+        if password == None:
+            error = "Neteisingas vardas"
+        elif password[0] != decodedPassword:
+            error = "Neteisingas slaptazodis"
         else:
             session["logged_in"] = True
-            flash("You were logged in")
+            flash("Prisijungėte")
             return redirect(url_for("show_entries"))
     return render_template("login.html", error=error)
 
 @app.route("/logout")
 def logout():
     session.pop("logged_in", None)
-    flash("You were logged out")
+    flash("Atsijungėte")
     return redirect(url_for("show_entries"))
 
 
