@@ -18,7 +18,7 @@ def hex2rgb(hex):
 
 
 def bin2str(binary):
-    return binascii.unhexlify('%x' % (int(binary,2)))  #TODO: gražesnis apipavidalinimas
+    return binascii.unhexlify('%x' % (int(binary, 2)))  #TODO: gražesnis apipavidalinimas
 
 
 def str2bin(message):
@@ -33,7 +33,7 @@ def encode(hex, number):
 
 
 def decode(hex):
-    if int(hex[-1]) in range(0, 2):
+    if int(hex[-1], 16) in range(0, 2):
         return hex[-1]
     else:
         return None
