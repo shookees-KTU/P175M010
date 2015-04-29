@@ -11,6 +11,6 @@ drop table if exists accounts;
 create table accounts
 (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  username string NOT NULL,
+  username string UNIQUE NOT NULL,
   password string NOT NULL
 );

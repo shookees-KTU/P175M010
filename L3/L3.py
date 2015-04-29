@@ -61,14 +61,12 @@ def get_author_id(name):
 @app.route("/register", methods=["GET", "POST"])
 def register():
     error = None
+    encoded_string = None
     if request.method == "POST":
         if request.form["username"]:
-            cur = g.db.execute("select 1 from accounts where username='{0}'".format(request.form["username"]))
-            if cur.rowcount > 0:
-                error = "Vartotojo vardas jau egzistuoja"
-            else:
-                #sukuriamas paprastas irasas
-                password = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(12))
+            #sukuriamas paprastas irasas
+            password = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(12))
+            try:
                 cur = g.db.execute("insert into accounts(username, password) values('{0}', '{1}')".format(
                                    request.form["username"].encode("utf-8"), password))
                 g.db.commit()
@@ -76,14 +74,17 @@ def register():
                 id = str(int(cur.lastrowid)) + ".png"
                 #bandom isideti paveiksleli
                 if not ImageRandomizer.createRandomImage(id):
-                    error = "Prasau bandyti iš naujo".encode("UTF-8")
+                    error = "Prasau bandyti is naujo".encode("UTF-8")
                 else:
                     Image.hide("/tmp/" + str(id), password)
-                with open("/tmp/" + str(id), "rb") as image_file:
-                    encoded_string = base64.b64encode(image_file.read())
-                #apsivalome
-                #os.remove("images/" + str(id))
-                return render_template("register.html", img=encoded_string)
+                    with open("/tmp/" + str(id), "rb") as image_file:
+                        encoded_string = base64.b64encode(image_file.read())
+                    #apsivalome
+                    os.remove("images/" + str(id))
+            except sqlite3.IntegrityError as e:
+                if "UNIQUE" in e.message:
+                    error = "Vartotojo vardas jau egzistuoja"
+            return render_template("register.html", img=encoded_string, error=error)
         else:
             error = "Blogai uzpildyta forma".encode("UTF-8")
 
@@ -107,7 +108,7 @@ def login():
         if password == None:
             error = "Neteisingas vardas"
         elif password[0] != decodedPassword:
-            error = "Neteisingas paveikslėlis"
+            error = "Neteisingas paveikslelis"
         else:
             session["logged_in"] = True
             session["username"] = request.form["username"]
