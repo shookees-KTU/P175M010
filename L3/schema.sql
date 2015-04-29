@@ -3,7 +3,8 @@ create table entries
 (
   id   INTEGER PRIMARY KEY AUTOINCREMENT,
   title string NOT NULL,
-  text string NOT NULL
+  text string NOT NULL,
+  author INTEGER NOT NULL
 );
 
 drop table if exists accounts;

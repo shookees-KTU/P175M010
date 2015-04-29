@@ -3,7 +3,7 @@
 <meta charset="UTF-8" />
 <link rel="stylesheet" type="text/css" href="{{ url_for("static", filename="style.css") }}"/>
 <div class="page">
-    <h1>L3</h1>
+    <h1><a href="{{ url_for("show_entries") }}">L3</a></h1>
     <div class="metanav">
         {% if not session.logged_in %}
             <a href="{{ url_for("register") }}">Registruotis</a>
