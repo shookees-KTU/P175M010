@@ -2,7 +2,8 @@
 Čia bus laboratorinių darbų aprašai su nuorodomis į konkrečias kodo vietas ir prezentacijas
 ##Turinys
  1. [Pirmasis laboratorinis darbas - Rail Fence realizacija](#pirmasis-laboratorinis-darbas)
- 2. [Antrasis laboratorinis darbas - Caesar autentifikacija ir autorizacija]("#antrasis-laboratorinis-darbas)
+ 2. [Antrasis laboratorinis darbas - Caesar autentifikacija ir autorizacija](#antrasis-laboratorinis-darbas)
+ 3. [Trečiasis laboratorinis darbas - Paveiksliukų stegonografija paremta prisijungimo sistema](#treciasis-laboratorinis-darbas)
  
 ##Pirmasis laboratorinis darbas
 Šiame darbe realizuotas transpozicinis [Rail Fence](http://en.wikipedia.org/wiki/Rail_fence_cipher) šifras, kurio principas - raidžių išdėstymas zigzagu ir nuskaitymas į vieną žodį eilutė po eilutės.
@@ -48,3 +49,17 @@ Pirmasis žingsnis turi šiokių tokių svarbių aspektų:
 Cezario šifras yra paremtas individualios raidės perstūmimu. Pavyzdžiui A perstūmiama per 2 vietas angliškame alfabete, būtų A->B->**C**
 
 Ši sistema lygiai tuo pačiu principu tekstą užšifruoja ir atšifruoja kliento ir serverio pusėse.
+
+##Trečiasis laboratorinis darbas
+Šiame laboratoriniame darbe realizuota kliento prisijungimo sistema prie serverio naudojantis stegonografija. Tiksliau, prisijungimui pateikiamas prisijungimo vardas ir paveiksliukas, kurio pagalba serveris nustato ar tai tikrai to vartotojo paveiksliukas.
+
+Žinoma, prisijungimui neveiks bet kuris paveiksliukas, nes jame yra paslepiama prisijungimo informacija.
+
+Informacijos slėpimo mechanizmas yra paremtas nedidele deviacija nuo originalių paveiksliuko spalvų. Žinant, kad kiekvienas paveiksliuko pikselis yra paremtas RGB (raudona, žalia ir mėlyna) spalvų variacija, kurioms kiekvienai skiriama po 256 ryškumo reikšmes, turint apibrėžtas taisykles galima nežymiai pakeisti vienos ar kelių spalvų reikšmes. Žmogaus akiai šis pakeitimas yra praktiškai nepastebimas, nes spalvos pokytis per vieną vertė tėra `0,004%` reliatyvinis pokytis.
+
+Šitame laboratoriniame darbe pasirinkau modifikuoti vieną spalva taip, kad nuosekliai skaitant kiekvieno pikselio, kurio mėlyna spalvos reikšmė yra labai žema  (0 - 6 rėžiuose), pridėti binarinę užslėpto teksto vertę (vieną bitą) ir pabaigai pažymėti panaudoti tam tikrą spalvų seką. Atšifruojant žinomi rėžiai ir spalva padės nustatyti tekstą.
+
+###Galimos problemos:
+ - Paveiksliukai neturi pakankamai pikselių tam tikram tekstui,
+ - Paveiksliukai neturi pakankamai tinkamo rėžio pikselių tam tikram tekstui,
+ - Paveiksliukas gali turėti pabaigos pikselių sekas tenai, kur jų neturėtų būti
